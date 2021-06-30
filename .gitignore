@@ -1,0 +1,12 @@
+
+.DS_Store
+
+# Ignore IDE files
+.idea/
+
+# Udacity provides some test data
+data/udacity_provided/
+
+# I don't want to store the SD Car simulator in GitHub
+Simulator/
+
