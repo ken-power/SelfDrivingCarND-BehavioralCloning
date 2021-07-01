@@ -14,6 +14,8 @@ from flask import Flask
 from keras import __version__ as keras_version
 from keras.models import load_model
 
+import cv2
+
 sio = socketio.Server()
 app = Flask(__name__)
 model = None
@@ -46,20 +48,43 @@ set_speed = 9
 controller.set_desired(set_speed)
 
 
+def image_preprocess(image):
+    top_of_image = 60
+    bottom_of_image = 135
+    image = image[top_of_image:bottom_of_image, :, :]
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
+
+    kernel_size = (3, 3)
+    image = cv2.GaussianBlur(image, kernel_size, 0)
+
+    target_size = (200, 66)  # per NVidia model recommendations
+    image = cv2.resize(image, target_size)
+
+    # normalize the image
+    image = image / 255
+
+    return image
+
+
 @sio.on('telemetry')
 def telemetry(sid, data):
     if data:
         # The current steering angle of the car
         steering_angle = data["steering_angle"]
+
         # The current throttle of the car
         throttle = data["throttle"]
+
         # The current speed of the car
         speed = data["speed"]
+
         # The current image from the center camera of the car
-        imgString = data["image"]
-        image = Image.open(BytesIO(base64.b64decode(imgString)))
-        image_array = np.asarray(image)
-        steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
+        image = Image.open(BytesIO(base64.b64decode(data["image"])))
+        image = np.asarray(image)
+        image = image_preprocess(image)
+        image = np.array([image])  # expects a 4D array, hence wrap image in np.array
+
+        steering_angle = float(model.predict(image[None, :, :, :], batch_size=1))
 
         throttle = controller.update(float(speed))
 
@@ -135,3 +160,5 @@ if __name__ == '__main__':
 
     # deploy as an eventlet WSGI server
     eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
+
+    print("Hello")
