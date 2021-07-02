@@ -20,6 +20,7 @@ app = Flask(__name__)
 model = None
 prev_image_array = None
 
+speed_limit = 15
 
 class SimplePIController:
     def __init__(self, Kp, Ki):
@@ -82,7 +83,7 @@ def telemetry(sid, data):
         throttle = data["throttle"]
 
         # The current speed of the car
-        speed = data["speed"]
+        speed = float(data["speed"])
 
         # The current image from the center camera of the car
         image = Image.open(BytesIO(base64.b64decode(data["image"])))
@@ -90,11 +91,12 @@ def telemetry(sid, data):
         image = image_preprocess(image)
         image = np.array([image])  # expects a 4D array, hence wrap image in np.array
 
-        steering_angle = float(model.predict(image[None, :, :, :], batch_size=1))
+#        steering_angle = float(model.predict(image[None, :, :, :], batch_size=1))
+#        throttle = controller.update(float(speed))
+        steering_angle = float(model.predict(image))
+        throttle = 1.0 - speed / speed_limit
 
-        throttle = controller.update(float(speed))
-
-        print('steering angle: {} \tthrottle: {} \t\tspeed: {}'.format(steering_angle, throttle, speed))
+        print('steering angle: {:.6f} \tthrottle: {:.6f} \tspeed: {:.6f}'.format(steering_angle, throttle, speed))
 
         send_control(steering_angle, throttle)
 
