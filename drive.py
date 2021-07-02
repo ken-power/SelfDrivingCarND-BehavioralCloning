@@ -5,6 +5,7 @@ import shutil
 from datetime import datetime
 from io import BytesIO
 
+import cv2
 import eventlet.wsgi
 import h5py
 import numpy as np
@@ -13,8 +14,6 @@ from PIL import Image
 from flask import Flask
 from keras import __version__ as keras_version
 from keras.models import load_model
-
-import cv2
 
 sio = socketio.Server()
 app = Flask(__name__)
@@ -66,6 +65,13 @@ def image_preprocess(image):
     return image
 
 
+def save_image_to_file(image, filename):
+    print("***FILENAME={}, image shape={}".format(filename, image.shape))
+
+    im = Image.fromarray(image[1:])
+    im.save(filename)
+
+
 @sio.on('telemetry')
 def telemetry(sid, data):
     if data:
@@ -88,14 +94,16 @@ def telemetry(sid, data):
 
         throttle = controller.update(float(speed))
 
-        print(steering_angle, throttle)
+        print('steering angle: {} \tthrottle: {} \t\tspeed: {}'.format(steering_angle, throttle, speed))
+
         send_control(steering_angle, throttle)
 
         # save frame
         if args.image_folder != '':
             timestamp = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
             image_filename = os.path.join(args.image_folder, timestamp)
-            image.save('{}.jpg'.format(image_filename))
+            image_filename = image_filename + '.jpg'
+            save_image_to_file(image, image_filename)
     else:
         # NOTE: DON'T EDIT THIS.
         sio.emit('manual', data={}, skip_sid=True)
@@ -160,5 +168,3 @@ if __name__ == '__main__':
 
     # deploy as an eventlet WSGI server
     eventlet.wsgi.server(eventlet.listen(('', 4567)), app)
-
-    print("Hello")
