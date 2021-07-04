@@ -69,8 +69,8 @@ def image_preprocess(image):
 def save_image_to_file(image, filename):
     print("***FILENAME={}, image shape={}".format(filename, image.shape))
 
-    im = Image.fromarray(image[1:])
-    im.save(filename)
+    if not cv2.imwrite(filename, image[1:]):
+        raise Exception("Error trying to save image", filename)
 
 
 @sio.on('telemetry')
@@ -92,9 +92,10 @@ def telemetry(sid, data):
         image = np.array([image])  # expects a 4D array, hence wrap image in np.array
 
 #        steering_angle = float(model.predict(image[None, :, :, :], batch_size=1))
-#        throttle = controller.update(float(speed))
         steering_angle = float(model.predict(image))
-        throttle = 1.0 - speed / speed_limit
+
+        throttle = controller.update(float(speed))
+        # throttle = 1.0 - speed / speed_limit
 
         print('steering angle: {:.6f} \tthrottle: {:.6f} \tspeed: {:.6f}'.format(steering_angle, throttle, speed))
 
