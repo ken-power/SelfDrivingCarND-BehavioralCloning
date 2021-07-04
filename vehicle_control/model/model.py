@@ -1,14 +1,12 @@
-from sklearn.model_selection import train_test_split
-
 from vehicle_control.model.data_manager import DataManager
 from vehicle_control.model.model_builder import VehicleControlModelBuilder
 from vehicle_control.model.model_trainer import ModelTrainer
 
 if __name__ == '__main__':
-
+    print("#### ---- STARTING ---- ####")
     print("#### ---- Retrieving the training data")
 
-    datadir = 'data/new'
+    datadir = '../../data/new'
     datafile = 'driving_log.csv'
 
     data_manager = DataManager(datadir, datafile)
@@ -29,3 +27,11 @@ if __name__ == '__main__':
 
     trainer = ModelTrainer(vehicle_control_model)
     trainer.train_model(X_train, y_train, X_valid, y_valid)
+
+    print("#### ---- Saving the trained model:")
+    models_dir = 'Models'
+    model_name = 'model.h5'
+
+    vehicle_control_model.save(models_dir + '/' + model_name)
+
+    print("#### ---- DONE ---- ####")

@@ -24,6 +24,9 @@ class DataManager:
         self.data['left'] = self.data['left'].apply(self.path_leaf)
         self.data['right'] = self.data['right'].apply(self.path_leaf)
 
+    def get_data(self):
+        return self.data
+
     def steering_data(self):
         return self.data['steering']
 
@@ -83,7 +86,7 @@ class DataManager:
             indexed_data = self.data.iloc[i]
             center, left, right = indexed_data[0], indexed_data[1], indexed_data[2]
 
-            image_path.append(os.path.join(self.data_dir, center.strip()))
+            image_path.append(os.path.join(self.data_dir + '/IMG/', center.strip()))
             steering.append(float(indexed_data[3]))
 
         image_paths = np.asarray(image_path)
