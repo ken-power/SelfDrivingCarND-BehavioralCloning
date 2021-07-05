@@ -87,6 +87,10 @@ class DataManager:
             center, left, right = indexed_data[0], indexed_data[1], indexed_data[2]
 
             image_path.append(os.path.join(self.data_dir + '/IMG/', center.strip()))
+            print("Adding left and right camera images to image_path")
+            image_path.append(os.path.join(self.data_dir + '/IMG/', left.strip()))
+            image_path.append(os.path.join(self.data_dir + '/IMG/', right.strip()))
+
             steering.append(float(indexed_data[3]))
 
         image_paths = np.asarray(image_path)
