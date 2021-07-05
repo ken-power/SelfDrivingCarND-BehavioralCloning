@@ -86,10 +86,10 @@ class DataManager:
             indexed_data = self.data.iloc[i]
             center, left, right = indexed_data[0], indexed_data[1], indexed_data[2]
 
-            image_path.append(os.path.join(self.data_dir + '/IMG/', center.strip()))
-            print("Adding left and right camera images to image_path")
-            image_path.append(os.path.join(self.data_dir + '/IMG/', left.strip()))
-            image_path.append(os.path.join(self.data_dir + '/IMG/', right.strip()))
+            image_dir = '/IMG/'
+            image_path.append(os.path.join(self.data_dir + image_dir, center.strip()))
+            image_path.append(os.path.join(self.data_dir + image_dir, left.strip()))
+            image_path.append(os.path.join(self.data_dir + image_dir, right.strip()))
 
             steering.append(float(indexed_data[3]))
 
