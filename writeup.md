@@ -249,6 +249,16 @@ optimizer = Adam(learning_rate=learning_rate)
 model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy', 'mae'])
 ```
 
+These are the model hyperparameter values (set in [model_builder.py](vehicle_control/model/model_builder.py)) I ended up using after experimenting with different values:
+
+```text
+Model hyperparameters:
+Epochs =  5
+Batch size = 150
+Steps per epoch = 300
+Validation Steps = 200
+```
+
 ### 4. Appropriate training data
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road, and changing speeds in different road conditions e.g., slowing on corners, driving faster on long straight stretches.
@@ -377,15 +387,6 @@ The code for this is in [data_manager.py](vehicle_control/model/data_manager.py)
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting.
 
-These are the model hyperparameters I ended up using after experimenting with different values:
-
-```text
-Model hyperparameters:
-Epochs =  5
-Batch size = 150
-Steps per epoch = 300
-Validation Steps = 200
-```
 ## Simulation summary
 The car is able to navigate correctly on test data. No tire leaves the drivable portion of the track surface. The car does not pop up onto ledges or roll over any surfaces that would otherwise be considered unsafe.
 
