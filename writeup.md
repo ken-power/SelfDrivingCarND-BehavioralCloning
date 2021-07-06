@@ -31,31 +31,22 @@ The goals / steps of this project are the following:
 [image_left_lane_driving]: data/new/IMG/left_2021_07_02_16_12_37_683.jpg "Left Lane Driving"
 [image_right_lane_driving]: data/new/IMG/right_2021_07_02_16_12_37_683.jpg "Right Lane Driving"
 
+---
 # Rubric Points
 Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
 
----
 ## Files Submitted & Code Quality
 
 ### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
-* [model.py](vehicle_control/model/model.py) containing the script to create and train the model
-* [drive.py](vehicle_control/controller/drive.py) for driving the car in autonomous mode
-* [model.h5](Models/model.h5) containing a trained convolution neural network 
-* [writeup_report.md](writeup.md) summarizing the results
+* [model.py](vehicle_control/model/model.py) containing the pipeline to create and train the model. The code is split into multiple files. The structure of the code is described below.
+* [drive.py](vehicle_control/controller/drive.py) for driving the car in autonomous mode.
+* [model.h5](Models/model.h5) containing a trained convolution neural network.
+* [writeup.md](writeup.md) summarizing the results (this file that you are reading now).
+* [An output video](output_videos/behavioral_cloning_lap_camera_perspective_60fps.mp4) created using [video.py](video.py) that demosntrates the car successfully navigatingthe track. 
 
-### 2. Submission includes functional code
 
-Using the Udacity-provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
-```sh
-python vehicle_control/controller/drive.py Models/model.h5
-```
-
-To record images for creating the output video:
-```sh
-python vehicle_control/controller/drive.py Models/model.h5 output_images
-```
 
 The video (uploaded to YouTube) was created from the center camera perspective:
 
@@ -74,6 +65,58 @@ This is the same video (hosted on YouTube) at normal speed:
 
 [![Full Lap](https://img.youtube.com/vi/TtyE2fUokBQ/0.jpg)](https://youtu.be/TtyE2fUokBQ "Video of car driving autonomously for a full lap")
 
+
+
+### 2. Submission includes functional code
+
+Using the Udacity-provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
+```sh
+python vehicle_control/controller/drive.py Models/model.h5
+```
+
+
+To record images for creating the output video:
+```sh
+python vehicle_control/controller/drive.py Models/model.h5 output_images
+```
+
+Running the program starts a `wsgi` server that communicates with the simulator. **WARNING:** specifying `output_folder` will delete the folder, if already exists, and all of its images, and create a new empty folder. Be sure to back up your images if you want to keep the output images from previous runs.
+
+```text
+Creating image folder at output_images
+RECORDING THIS RUN ...
+(36770) wsgi starting up on http://0.0.0.0:4567
+```
+
+When the simulator connects, running `drive.py` from a console displays the steering angle, throttle, and speed for each frame, e.g.:
+
+```text
+steering angle: -0.223748 	throttle: 0.076390 	speed: 9.005400
+steering angle: -0.243966 	throttle: 0.076950 	speed: 8.999800
+steering angle: -0.243966 	throttle: 0.076951 	speed: 8.999800
+steering angle: -0.243966 	throttle: 0.076951 	speed: 8.999800
+steering angle: -0.192701 	throttle: 0.077217 	speed: 8.997200
+steering angle: -0.192701 	throttle: 0.077222 	speed: 8.997200
+steering angle: -0.192701 	throttle: 0.077228 	speed: 8.997200
+steering angle: 0.022527 	throttle: 0.077488 	speed: 8.994700
+steering angle: 0.022527 	throttle: 0.077499 	speed: 8.994700
+steering angle: 0.022527 	throttle: 0.077510 	speed: 8.994700
+steering angle: 0.196610 	throttle: 0.077194 	speed: 8.997900
+steering angle: 0.196610 	throttle: 0.077198 	speed: 8.997900
+steering angle: 0.196610 	throttle: 0.077202 	speed: 8.997900
+steering angle: 0.160474 	throttle: 0.078155 	speed: 8.988600
+steering angle: 0.160474 	throttle: 0.078178 	speed: 8.988600
+steering angle: 0.160474 	throttle: 0.078201 	speed: 8.988600
+steering angle: 0.112251 	throttle: 0.080182 	speed: 8.969400
+steering angle: 0.112251 	throttle: 0.080243 	speed: 8.969400
+steering angle: 0.112251 	throttle: 0.080304 	speed: 8.969400
+steering angle: 0.025042 	throttle: 0.079937 	speed: 8.973600
+steering angle: 0.025042 	throttle: 0.079990 	speed: 8.973600
+steering angle: 0.025042 	throttle: 0.080043 	speed: 8.973600
+steering angle: -0.024324 	throttle: 0.079055 	speed: 8.983800
+steering angle: -0.024324 	throttle: 0.079087 	speed: 8.983800
+steering angle: -0.024324 	throttle: 0.079120 	speed: 8.983800
+```
 
 
 ### 3. Submission code is usable and readable
@@ -151,7 +194,7 @@ model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy', 'mae'])
 
 ### 4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road, and changing speeds in different road conditions e.g., slowing on corners, driving faster on long straight stretches.
 
 For details about how I created the training data, see the next section. 
 
@@ -159,9 +202,8 @@ For details about how I created the training data, see the next section.
 
 ### 1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+The overall strategy for deriving a model architecture was to start with the convolution neural network from the NVIDIA 3-Cmaera model described by [Bojarski, et al (2016)](#References).
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
 
@@ -169,49 +211,72 @@ To combat the overfitting, I modified the model so that ...
 
 Then I ... 
 
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
+The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle drove off the track. To improve the driving behavior in these cases, I recorded more training data focusing on these areas.
 
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+At the end of the process, the vehicle is now able to drive autonomously around the track without leaving the road.
 
 ### 2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture ([model_builder.py](vehicle_control/model/model_builder.py) lines 8-49) consisted of a convolution neural network with the layers and layer sizes shown in this summary view of the architecture:
 
-Here is a summary of the architecture:
-
-![alt text][image_model]
+![alt text][image_model_summary]
 
 ### 3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving, showing the image captured by the left, center, and right cameras:
 
-![alt text][image_center_lane_driving]
+Left Camera | Center Camera | Right Camera
+:---:|:---:|:---:
+![alt text][image_left_lane_driving]|![alt text][image_center_lane_driving]|![alt text][image_right_lane_driving]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
-
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recover and re-center itself.
 
 Then I repeated this process on track two in order to get more data points.
 
 ### Image Augmentation
-To augment the data set, I applied several augmentations to the "real" dataset. These augmentations include flip, zoom,  
-also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+To augment the data set, I applied several augmentations to the "real" dataset. Applying augmentation techniques is a useful way to create more data from our existing data. This section of the notebook shows how I use zooming, panning, brightness, and flipping to create additional data for training the network. I then randomly apply multiple augmentations to the orginal data, so that, for example, one input image could result in an output image that is a variation that is flipped, rotated, and made brighter.
 
-Image Zooming
+#### Image Zooming
 ![alt text][image_augmented_zoom]
 
-Image Panning
+#### Image Panning
 ![alt text][image_augmented_panning]
 
-Adjust Image Brightness
+#### Adjust Image Brightness
 ![alt text][image_augmented_brightness]
 
-Image Flipping
+#### Image Flipping
 ![alt text][image_augmented_flipping]
 
 I wrote the code so that it would randomly apply augmentations, and ensure a reasonable distribution of augmentations. Multiple augmentations can be applied to the same image.
+
+The code for this is in [image_augmentor.py](vehicle_control/model/image_augmentor.py). Here is an extract of the code, showing how I apply the random augmentations. 
+
+```python
+    def random_augment(self, image, steering_angle):
+        augmentation_types = []
+
+        # we don't want any one transform used more than 50% of the time
+        FREQUENCY_THRESHOLD = 0.5
+
+        image = mpimg.imread(image)
+
+        if np.random.rand() < FREQUENCY_THRESHOLD:
+            image = self.pan(image)
+            augmentation_types.append("Pan")
+        if np.random.rand() < FREQUENCY_THRESHOLD:
+            image = self.zoom(image)
+            augmentation_types.append("Zoom")
+        if np.random.rand() < FREQUENCY_THRESHOLD:
+            image = self.randomly_alter_brightness(image)
+            augmentation_types.append("Brightness")
+        if np.random.rand() < FREQUENCY_THRESHOLD:
+            image, steering_angle = self.flip(image, steering_angle)
+            augmentation_types.append("Flip")
+
+        return image, steering_angle, augmentation_types
+
+```
 
 The following shows 10 random examples. The images on the left are the original images captured from the simulator. The images on the right show the results of applying augmentations. The titles show which augmentations have been applied.
 
@@ -226,40 +291,6 @@ I finally randomly shuffled the data set and put Y% of the data into a validatio
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
 
-
-
-
-
-```text
-steering angle: -0.211426 	throttle: 0.075952 	speed: 9.010100
-steering angle: -0.223748 	throttle: 0.076411 	speed: 9.005400
-steering angle: -0.223748 	throttle: 0.076401 	speed: 9.005400
-steering angle: -0.223748 	throttle: 0.076390 	speed: 9.005400
-steering angle: -0.243966 	throttle: 0.076950 	speed: 8.999800
-steering angle: -0.243966 	throttle: 0.076951 	speed: 8.999800
-steering angle: -0.243966 	throttle: 0.076951 	speed: 8.999800
-steering angle: -0.192701 	throttle: 0.077217 	speed: 8.997200
-steering angle: -0.192701 	throttle: 0.077222 	speed: 8.997200
-steering angle: -0.192701 	throttle: 0.077228 	speed: 8.997200
-steering angle: 0.022527 	throttle: 0.077488 	speed: 8.994700
-steering angle: 0.022527 	throttle: 0.077499 	speed: 8.994700
-steering angle: 0.022527 	throttle: 0.077510 	speed: 8.994700
-steering angle: 0.196610 	throttle: 0.077194 	speed: 8.997900
-steering angle: 0.196610 	throttle: 0.077198 	speed: 8.997900
-steering angle: 0.196610 	throttle: 0.077202 	speed: 8.997900
-steering angle: 0.160474 	throttle: 0.078155 	speed: 8.988600
-steering angle: 0.160474 	throttle: 0.078178 	speed: 8.988600
-steering angle: 0.160474 	throttle: 0.078201 	speed: 8.988600
-steering angle: 0.112251 	throttle: 0.080182 	speed: 8.969400
-steering angle: 0.112251 	throttle: 0.080243 	speed: 8.969400
-steering angle: 0.112251 	throttle: 0.080304 	speed: 8.969400
-steering angle: 0.025042 	throttle: 0.079937 	speed: 8.973600
-steering angle: 0.025042 	throttle: 0.079990 	speed: 8.973600
-steering angle: 0.025042 	throttle: 0.080043 	speed: 8.973600
-steering angle: -0.024324 	throttle: 0.079055 	speed: 8.983800
-steering angle: -0.024324 	throttle: 0.079087 	speed: 8.983800
-steering angle: -0.024324 	throttle: 0.079120 	speed: 8.983800
-```
 
 
 # References
