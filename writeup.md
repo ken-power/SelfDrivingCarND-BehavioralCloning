@@ -22,8 +22,14 @@ The goals / steps of this project are the following:
 [image_metrics_latest]: ./images/metrics_latest.png "Latest Metrics"
 [image_metrics_lambda_dropout_layers]: ./images/metrics_with_lambda_and_dropout.png "Metrics with Lambda and Dropout Layers"
 [image_preprocess]: ./images/preprocessed_image.png "Preprocessed image"
-[image_augmented]: ./images/augmented_images_examples.png "Augmented Images"
-
+[image_augmented_zoom]: ./images/augment_zoom.png "Image Zooming"
+[image_augmented_panning]: ./images/augment_pan.png "Image Panning"
+[image_augmented_brightness]: ./images/augment_brightness.png "Image Brightness"
+[image_augmented_flipping]: ./images/augment_flip.png "Image Flipping"
+[image_augmented_multiple]: ./images/augmented_images_examples.png "Multiple Augmented Images"
+[image_center_lane_driving]: data/new/IMG/center_2021_07_02_16_12_37_683.jpg "Center Lane Driving"
+[image_left_lane_driving]: data/new/IMG/left_2021_07_02_16_12_37_683.jpg "Left Lane Driving"
+[image_right_lane_driving]: data/new/IMG/right_2021_07_02_16_12_37_683.jpg "Right Lane Driving"
 
 # Rubric Points
 Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -70,13 +76,13 @@ This is the same video (hosted on YouTube) at normal speed:
 
 
 
-#### 3. Submission code is usable and readable
+### 3. Submission code is usable and readable
 
 The [model.py](vehicle_control/model/model.py) file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
-### Model Architecture and Training Strategy
+## Model Architecture and Training Strategy
 
-#### 1. An appropriate model architecture has been employed
+### 1. An appropriate model architecture has been employed
 
 My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
 
@@ -129,11 +135,11 @@ I did not use a Keras `Lambda` layer to normalize the data because I already nor
         return model
 ```
 
-#### 2. Attempts to reduce overfitting in the model
+### 2. Attempts to reduce overfitting in the model
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
-#### 3. Model parameter tuning
+### 3. Model parameter tuning
 
 The model used an `Adam` optimizer ([model_builder.py](vehicle_control/model/model_builder.py) line 45). I experimented with different learning rates, and eventually settled on a learning rate of `1e-4` ([model_builder.py](vehicle_control/model/model_builder.py) line 17).
 
@@ -143,15 +149,15 @@ optimizer = Adam(learning_rate=learning_rate)
 model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy', 'mae'])
 ```
 
-#### 4. Appropriate training data
+### 4. Appropriate training data
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
 
 For details about how I created the training data, see the next section. 
 
-### Model Architecture and Training Strategy
+## Model Architecture and Training Strategy
 
-#### 1. Solution Design Approach
+### 1. Solution Design Approach
 
 The overall strategy for deriving a model architecture was to ...
 
@@ -167,7 +173,7 @@ The final step was to run the simulator to see how well the car was driving arou
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
-#### 2. Final Model Architecture
+### 2. Final Model Architecture
 
 The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
 
@@ -175,11 +181,11 @@ Here is a summary of the architecture:
 
 ![alt text][image_model]
 
-#### 3. Creation of the Training Set & Training Process
+### 3. Creation of the Training Set & Training Process
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
-![alt text][image2]
+![alt text][image_center_lane_driving]
 
 I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
 
@@ -189,12 +195,29 @@ I then recorded the vehicle recovering from the left side and right sides of the
 
 Then I repeated this process on track two in order to get more data points.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+### Image Augmentation
+To augment the data set, I applied several augmentations to the "real" dataset. These augmentations include flip, zoom,  
+also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
 
-![alt text][image6]
-![alt text][image7]
+Image Zooming
+![alt text][image_augmented_zoom]
 
-Etc ....
+Image Panning
+![alt text][image_augmented_panning]
+
+Adjust Image Brightness
+![alt text][image_augmented_brightness]
+
+Image Flipping
+![alt text][image_augmented_flipping]
+
+I wrote the code so that it would randomly apply augmentations, and ensure a reasonable distribution of augmentations. Multiple augmentations can be applied to the same image.
+
+The following shows 10 random examples. The images on the left are the original images captured from the simulator. The images on the right show the results of applying augmentations. The titles show which augmentations have been applied.
+
+![alt text][image_augmented_multiple]
+
+
 
 After the collection process, I had over 57,000 data points. I then preprocessed this data by ...
 
@@ -237,6 +260,7 @@ steering angle: -0.024324 	throttle: 0.079055 	speed: 8.983800
 steering angle: -0.024324 	throttle: 0.079087 	speed: 8.983800
 steering angle: -0.024324 	throttle: 0.079120 	speed: 8.983800
 ```
+
 
 # References
 * Bojarski, M., Del Testa, D., Dworakowski, D., Firner, B., Flepp, B., Goyal, P., Jackel, L.D., Monfort, M., Muller, U., Zhang, J. and Zhang, X., 2016. _End to end learning for self-driving cars_. [arXiv preprint arXiv:1604.07316](https://arxiv.org/pdf/1604.07316.pdf).
