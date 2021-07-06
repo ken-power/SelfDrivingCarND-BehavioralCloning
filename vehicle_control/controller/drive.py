@@ -22,6 +22,7 @@ prev_image_array = None
 
 speed_limit = 15
 
+
 class SimplePIController:
     def __init__(self, Kp, Ki):
         self.Kp = Kp
@@ -66,13 +67,6 @@ def image_preprocess(image):
     return image
 
 
-def save_image_to_file(image, filename):
-    print("***FILENAME={}, image shape={}".format(filename, image.shape))
-
-    if not cv2.imwrite(filename, image[1:]):
-        raise Exception("Error trying to save image", filename)
-
-
 @sio.on('telemetry')
 def telemetry(sid, data):
     if data:
@@ -87,15 +81,12 @@ def telemetry(sid, data):
 
         # The current image from the center camera of the car
         image = Image.open(BytesIO(base64.b64decode(data["image"])))
-        image = np.asarray(image)
-        image = image_preprocess(image)
-        image = np.array([image])  # expects a 4D array, hence wrap image in np.array
+        image_array = np.asarray(image)
+        image_array = image_preprocess(image_array)
 
-#        steering_angle = float(model.predict(image[None, :, :, :], batch_size=1))
-        steering_angle = float(model.predict(image))
+        steering_angle = float(model.predict(image_array[None, :, :, :], batch_size=1))
 
         throttle = controller.update(float(speed))
-        # throttle = 1.0 - speed / speed_limit
 
         print('steering angle: {:.6f} \tthrottle: {:.6f} \tspeed: {:.6f}'.format(steering_angle, throttle, speed))
 
@@ -105,8 +96,7 @@ def telemetry(sid, data):
         if args.image_folder != '':
             timestamp = datetime.utcnow().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
             image_filename = os.path.join(args.image_folder, timestamp)
-            image_filename = image_filename + '.jpg'
-            save_image_to_file(image, image_filename)
+            image.save('{}.jpg'.format(image_filename))
     else:
         # NOTE: DON'T EDIT THIS.
         sio.emit('manual', data={}, skip_sid=True)

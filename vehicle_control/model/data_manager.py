@@ -81,15 +81,23 @@ class DataManager:
     def image_and_steering_data(self):
         image_path = []
         steering = []
+        image_dir = '/IMG/'
+
+        ring_counter = 1
 
         for i in range(len(self.data)):
             indexed_data = self.data.iloc[i]
             center, left, right = indexed_data[0], indexed_data[1], indexed_data[2]
 
-            image_dir = '/IMG/'
-            image_path.append(os.path.join(self.data_dir + image_dir, center.strip()))
-            image_path.append(os.path.join(self.data_dir + image_dir, left.strip()))
-            image_path.append(os.path.join(self.data_dir + image_dir, right.strip()))
+            if ring_counter == 1:
+                image_path.append(os.path.join(self.data_dir + image_dir, center.strip()))
+                ring_counter += 1
+            elif ring_counter == 2:
+                image_path.append(os.path.join(self.data_dir + image_dir, left.strip()))
+                ring_counter += 1
+            elif ring_counter == 3:
+                image_path.append(os.path.join(self.data_dir + image_dir, right.strip()))
+                ring_counter = 1
 
             steering.append(float(indexed_data[3]))
 
