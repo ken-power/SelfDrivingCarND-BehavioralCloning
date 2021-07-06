@@ -26,9 +26,9 @@ The goals / steps of this project are the following:
 [image_augmented_brightness]: ./images/augment_brightness.png "Image Brightness"
 [image_augmented_flipping]: ./images/augment_flip.png "Image Flipping"
 [image_augmented_multiple]: ./images/augmented_images_examples.png "Multiple Augmented Images"
-[image_center_lane_driving]: data/new/IMG/center_2021_07_02_16_12_37_683.jpg "Center Lane Driving"
-[image_left_lane_driving]: data/new/IMG/left_2021_07_02_16_12_37_683.jpg "Left Lane Driving"
-[image_right_lane_driving]: data/new/IMG/right_2021_07_02_16_12_37_683.jpg "Right Lane Driving"
+[image_center_lane_driving]: ./images/center_2021_07_02_16_12_37_683.jpg "Center Lane Driving"
+[image_left_lane_driving]: ./images/left_2021_07_02_16_12_37_683.jpg "Left Lane Driving"
+[image_right_lane_driving]: ./images/right_2021_07_02_16_12_37_683.jpg "Right Lane Driving"
 
 ---
 # Rubric Points
