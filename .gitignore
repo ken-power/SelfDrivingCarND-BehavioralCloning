@@ -20,3 +20,6 @@ output_videos/behavioral_cloning_lap.mp4
 output_videos/behavioral_cloning_lap_30x.mp4
 
 tests
+
+# The Udacity submission / review system has a limit on the number of files it accepts, so removing data for now
+data
