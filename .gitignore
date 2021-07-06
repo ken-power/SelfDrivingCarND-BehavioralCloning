@@ -4,9 +4,19 @@
 # Ignore IDE files
 .idea/
 
-# Udacity provides some test data
-data/udacity_provided/
+# Ignore notebook checkpoints
+.ipynb_checkpoints/
 
 # I don't want to store the SD Car simulator in GitHub
 Simulator/
 
+__pycache__/
+
+# These are the images recorded by drive.py and used by video.py to create the output video
+output_images
+
+# I uploaded these videos to YouTube - too big for GitHub without LFS
+output_videos/behavioral_cloning_lap.mp4
+output_videos/behavioral_cloning_lap_30x.mp4
+
+tests
