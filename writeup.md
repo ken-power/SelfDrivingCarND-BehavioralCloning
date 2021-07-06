@@ -8,7 +8,6 @@ The goals / steps of this project are the following:
 * Test that the model successfully drives around track one without leaving the road
 * Summarize the results with a written report
 
-
 [//]: # (Image References)
 
 [image_cnn]: ./images/CNN_architecture.png "CNN Architecture"
@@ -40,13 +39,11 @@ Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/4
 ### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
-* [model.py](vehicle_control/model/model.py) containing the pipeline to create and train the model. The code is split into multiple files. The structure of the code is described below.
+* [model.py](vehicle_control/model/model.py) containing the pipeline to create and train the model. The code is split into multiple files that I structureed in a module I called [vehicle_control](vehicle_control). The structure of the [vehicle_control](vehicle_control) module is described below.
 * [drive.py](vehicle_control/controller/drive.py) for driving the car in autonomous mode.
 * [model.h5](Models/model.h5) containing a trained convolution neural network.
 * [writeup.md](writeup.md) summarizing the results (this file that you are reading now).
 * [An output video](output_videos/behavioral_cloning_lap_camera_perspective_60fps.mp4) created using [video.py](video.py) that demosntrates the car successfully navigatingthe track. 
-
-
 
 The video (uploaded to YouTube) was created from the center camera perspective:
 
@@ -61,19 +58,40 @@ This video (hosted on YouTube) is sped up 30x and shows the car driving autonomo
 
 [![Full Lap (30x speed)](https://img.youtube.com/vi/6RJoLfOq9N8/0.jpg)](https://youtu.be/6RJoLfOq9N8 "Video of car driving autonomously for a full lap (30x speed)")
 
-This is the same video (hosted on YouTube) at normal speed:
-
-[![Full Lap](https://img.youtube.com/vi/TtyE2fUokBQ/0.jpg)](https://youtu.be/TtyE2fUokBQ "Video of car driving autonomously for a full lap")
-
 
 
 ### 2. Submission includes functional code
+
+Here is the full structure of the [vehicle_control](vehicle_control) module:
+```text
+vehicle_control
+|
+|- controller
+    |- drive.py
+|
+|- model
+    |- batch_image_generator.py
+    |- data_manager.py
+    |- image_augmentor.py
+    |- model_builder.py
+    |- model_trainer.py
+    |- model.py
+```
+
+The files in [vehicle_control/model](vehicle_control/model) are:
+* [batch_image_generator.py](vehicle_control/model/batch_image_generator.py) contains a batch generator that allows us to generate augmented images on the fly, when needed. 
+* [data_manager.py](vehicle_control/model/data_manager.py) is responsible for managing the datasets. It takes in the CVS data file and works with the image files, hiding the details from the rest of the code. The function `training_and_test_data()` provides the training and test data.
+* [image_augmentor.py](vehicle_control/model/image_augmentor.py) is responsible for creating the augmented images, [described below in this report](#image-augmentation).
+* [model_builder.py](vehicle_control/model/model_builder.py) encapsulates the code that builds the CNN.
+* [model_trainer.py](vehicle_control/model/model_trainer.py) is responsible for training the model.
+* [model.py](vehicle_control/model/model.py) is the entry point to the vehicle control pipeline, and coordinates the other files in the [vehicle_control/model](vehicle_control/model) module.
+
+I also include a notebook called [behavioral_cloning.ipynb](behavioral_cloning.ipynb) that I created to help with data exploration, testing my code, and analyzing the model results. The notebook also imports and uses the code from the [vehicle_control](vehicle_control) module. 
 
 Using the Udacity-provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
 ```sh
 python vehicle_control/controller/drive.py Models/model.h5
 ```
-
 
 To record images for creating the output video:
 ```sh
@@ -221,6 +239,12 @@ The final model architecture ([model_builder.py](vehicle_control/model/model_bui
 
 ![alt text][image_model_summary]
 
+I created this visualization using `tensorflow.keras.utils.plot_model`:
+![alt text][image_model_plot]
+
+I created this visualization using `keras_visuzlizer`: 
+![alt text][image_model_viz]
+
 ### 3. Creation of the Training Set & Training Process
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving, showing the image captured by the left, center, and right cameras:
@@ -286,10 +310,36 @@ The following shows 10 random examples. The images on the left are the original 
 
 After the collection process, I had over 57,000 data points. I then preprocessed this data by ...
 
+![alt_text][image_data_dist]
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
+As might be expected, this shows that the angle of `0.0`, representing straight ahead, is the most common steering angle. However, for the purposes of training our neural network, this presents a problem because the center value dominate all other values, which would introduce bias in training our network.
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+The solution is to remove a set of the data from the center of the dataset, which results in a more normalized distribution of the data.
+
+![alt_text][image_data_dist_normal]
+
+The following bar charts show the distribution of the data after splitting the data into training and test sets:
+![alt_text][image_data_dist_training_val]
+
+I finally randomly shuffled the data set and put 20% of the data into a validation set.
+
+The code for this is in [data_manager.py](vehicle_control/model/data_manager.py).
+
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting.
+
+These are the model hyperparameters I ended up using after experimenting with different values:
+
+```text
+Model hyperparameters:
+Epochs =  5
+Batch size = 150
+Steps per epoch = 300
+Validation Steps = 200
+```
+
+This is the same video (hosted on YouTube) at normal speed:
+
+[![Full Lap](https://img.youtube.com/vi/TtyE2fUokBQ/0.jpg)](https://youtu.be/TtyE2fUokBQ "Video of car driving autonomously for a full lap")
 
 
 
