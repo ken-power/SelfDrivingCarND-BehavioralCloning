@@ -271,8 +271,13 @@ For details about how I created the training data, see the next section.
 
 The overall strategy for deriving a model architecture was to start with the convolution neural network from the NVIDIA 3-Cmaera model described by [Bojarski, et al (2016)](#References).
 
+![alt_text][image_cnn]
+
+We can see from the diagram that the Nvidia model begins with an Input layer (the Input planes at the bottom of the diagram), and then has a Normalization layer. We are going to skip the Normalization layer in our implementation because we have already normalized the data outside of our model, as part of the image processing. The normalized data is then passed into a convolutional layer.
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+
+Note, we can prevent overfitting by using a dropout layer in the model. Note, I experimented with Dropout Layers in different positions in the model at different times, and with varying dropout rates. Eventually, by experimenting with the hyperparameter values during training, I was able to reduce overfitting without the use of dropout layers.
 
 The `training_and_test_data()` function in [data_manager.py](vehicle_control/model/data_manager.py) manages this:
 ```python
@@ -387,6 +392,78 @@ The code for this is in [data_manager.py](vehicle_control/model/data_manager.py)
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting.
 
+### Preprocessing image data
+
+Following the recommendation in [Bojarski, et al (2016)](#References) I decided to pre-process the images before passing them to the CNN.
+
+Here is an example of an original image and the results after pre-processing that image.
+![alt_text][image_preprocess]
+
+The `image_preprocess()` function in [image_augmentor.py](vehicle_control/model/image_augmentor.py) contains the code that performs this pre-processing:
+
+```python
+    def image_preprocess(self, image):
+        image = image[self.top_of_image:self.bottom_of_image, :, :]
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2YUV)
+
+        kernel_size = (3, 3)
+        image = cv2.GaussianBlur(image, kernel_size, 0)
+
+        target_size = (200, 66)  # per NVidia model recommendations
+        image = cv2.resize(image, target_size)
+
+        # normalize the image
+        image = image / 255
+
+        return image
+```
+
+Note, that because my CNN expects pre-processed images, I also have to pre-process the images in [drive.py](vehicle_control/controller/drive.py) that come from the simulator.
+
+### Batch generator
+Generators can be a great way to work with large amounts of data. Instead of storing the preprocessed data in memory all at once, using a generator you can pull pieces of the data and process them on the fly only when you need them, which is much more memory-efficient.
+
+A generator is like a coroutine, a process that can run separately from another main routine, which makes it a useful Python function. Instead of using return, the generator uses yield, which still returns the desired output values but saves the current values of all the generator's variables. When the generator is called a second time it re-starts right after the yield statement, with all its variables set to the same values as before.
+
+I wrote a generator function in the class `BatchImageGenerator` in [batch_image_generator.py](vehicle_control/model/batch_image_generator.py):
+
+```python
+    def batch_generator(self, image_paths, steering_angles, batch_size, is_training):
+        """
+        The Batch Generator allows us to generate augmented images on the fly, when needed.
+        """
+
+        while True:
+            batch_img = []
+            batch_steering = []
+
+            for i in range(batch_size):
+                random_index = random.randint(0, len(image_paths) - 1)
+
+                if is_training:
+                    im, steering, aug_type = \
+                        self.image_augmentor.random_augment(image_paths[random_index],
+                                                            steering_angles[random_index])
+                else:
+                    im = mpimg.imread(image_paths[random_index])
+                    steering = steering_angles[random_index]
+
+                im = self.image_augmentor.image_preprocess(im)
+                batch_img.append(im)
+                batch_steering.append(steering)
+
+            yield (np.asarray(batch_img), np.asarray(batch_steering))
+```
+
+Note that when in training mode this generator works in collaboration with the [image augmentor](#Image-augmentation) described earlier:
+
+```python
+if is_training:
+    im, steering, aug_type = self.image_augmentor.random_augment(image_paths[random_index], 
+                                                                 steering_angles[random_index])
+
+```
+
 ## Simulation summary
 The car is able to navigate correctly on test data. No tire leaves the drivable portion of the track surface. The car does not pop up onto ledges or roll over any surfaces that would otherwise be considered unsafe.
 
@@ -394,11 +471,10 @@ This is the same video (hosted on YouTube) at normal speed:
 
 [![Full Lap](https://img.youtube.com/vi/TtyE2fUokBQ/0.jpg)](https://youtu.be/TtyE2fUokBQ "Video of car driving autonomously for a full lap")
 
-
-
 # References
 * Bojarski, M., Del Testa, D., Dworakowski, D., Firner, B., Flepp, B., Goyal, P., Jackel, L.D., Monfort, M., Muller, U., Zhang, J. and Zhang, X., 2016. _End to end learning for self-driving cars_. [arXiv preprint arXiv:1604.07316](https://arxiv.org/pdf/1604.07316.pdf).
 * Francois Chollet, 2018. Deep Learning with Python, _Chapter 5: Deep Learning for Computer Vision_. Manning Publications Co. 
 * Clevert, D.A., Unterthiner, T. and Hochreiter, S., 2015. _Fast and accurate deep network learning by exponential linear units (elus)_. [arXiv preprint arXiv:1511.07289](https://arxiv.org/pdf/1511.07289.pdf).
 * Pedamonti, D., 2018. Comparison of non-linear activation functions for deep neural networks on MNIST classification task. [arXiv preprint arXiv:1804.02763](https://arxiv.org/pdf/1804.02763.pdf).
 * Adrian Rosenbrock, 2021. [Visualizing network architectures using Keras and TensorFlow](https://www.pyimagesearch.com/2021/05/22/visualizing-network-architectures-using-keras-and-tensorflow/). pyimagesearch.
+
