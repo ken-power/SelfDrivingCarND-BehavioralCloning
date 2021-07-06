@@ -139,9 +139,48 @@ steering angle: -0.024324 	throttle: 0.079120 	speed: 8.983800
 
 ### 3. Submission code is usable and readable
 
-The [model.py](vehicle_control/model/model.py) file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+The [model.py](vehicle_control/model/model.py) file contains the code for training and saving the convolution neural network. The file contians the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
-## Model Architecture and Training Strategy
+Here is an extract showing the main pipeline code: 
+```python
+
+if __name__ == '__main__':
+    print("#### ---- STARTING ---- ####")
+    print("#### ---- Retrieving the training data")
+
+    datadir = '../../data/new'
+    datafile = 'driving_log.csv'
+
+    data_manager = DataManager(datadir, datafile)
+    data_manager.normalize_steering_data()
+    X_train, X_valid, y_train, y_valid = data_manager.training_and_test_data()
+
+    print('Training samples: {}'.format(len(X_train)))
+    print('Validation samples: {}'.format(len(X_valid)))
+
+    print("#### ---- Building a new model:")
+
+    model_builder = VehicleControlModelBuilder()
+    vehicle_control_model = model_builder.nvidia_model()
+
+    print(vehicle_control_model.summary())
+
+    print("#### ---- Training the model:")
+
+    trainer = ModelTrainer(vehicle_control_model)
+    trainer.train_model(X_train, y_train, X_valid, y_valid)
+
+    print("#### ---- Saving the trained model:")
+    models_dir = 'Models'
+    model_name = 'model.h5'
+
+    vehicle_control_model.save(models_dir + '/' + model_name)
+
+    print("#### ---- DONE ---- ####")
+
+```
+
+## Architecture and Training Documentation
 
 ### 1. An appropriate model architecture has been employed
 
@@ -225,9 +264,20 @@ The overall strategy for deriving a model architecture was to start with the con
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
 
-To combat the overfitting, I modified the model so that ...
+The `training_and_test_data()` function in [data_manager.py](vehicle_control/model/data_manager.py) manages this:
+```python
+    def training_and_test_data(self):
+        image_paths, steering_data = self.image_and_steering_data()
 
-Then I ... 
+        X_train, X_valid, y_train, y_valid = train_test_split(image_paths,
+                                                              steering_data,
+                                                              test_size=0.2,
+                                                              random_state=9)
+
+        return X_train, X_valid, y_train, y_valid
+
+```
+This uses the `train_test_split()` function from `sklearn`. This function shuffles the data before splitting. The `random_state` parameter controls the shuffling applied to the data before applying the split. I pass an int (in this case, `9`) so that the output is reproducible across multiple function calls. The `test_size` parameter is a float representing the proportion of the dataset to include in the test split, in this case `0.2` or 20%.
 
 The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle drove off the track. To improve the driving behavior in these cases, I recorded more training data focusing on these areas.
 
@@ -336,6 +386,8 @@ Batch size = 150
 Steps per epoch = 300
 Validation Steps = 200
 ```
+## Simulation summary
+The car is able to navigate correctly on test data. No tire leaves the drivable portion of the track surface. The car does not pop up onto ledges or roll over any surfaces that would otherwise be considered unsafe.
 
 This is the same video (hosted on YouTube) at normal speed:
 
