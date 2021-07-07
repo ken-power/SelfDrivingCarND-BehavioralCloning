@@ -35,9 +35,9 @@ class VehicleControlModelBuilder:
 
         model.add(Dense(50, activation='elu', name='Fully_connected_50'))
         # model.add(Dropout(dropout_rate))
-        model.add(Dropout(0.2))
 
         model.add(Dense(10, activation='elu', name='Fully_connected_10'))
+        model.add(Dropout(0.2))
 
         # outputs the predicted steering angle for our self-driving car
         model.add(Dense(1, name='Output_vehicle_control'))
