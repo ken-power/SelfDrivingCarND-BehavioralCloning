@@ -12,8 +12,8 @@ import numpy as np
 import socketio
 from PIL import Image
 from flask import Flask
-from keras import __version__ as keras_version
-from keras.models import load_model
+from tensorflow.python.keras import __version__ as keras_version
+from tensorflow.python.keras.models import load_model
 
 sio = socketio.Server()
 app = Flask(__name__)
@@ -136,6 +136,7 @@ if __name__ == '__main__':
 
     # check that model Keras version is same as local Keras version
     f = h5py.File(args.model, mode='r')
+
     model_version = f.attrs.get('keras_version')
     keras_version = str(keras_version).encode('utf8')
 
@@ -144,6 +145,8 @@ if __name__ == '__main__':
               ', but the model was built using ', model_version)
 
     model = load_model(args.model)
+
+    print("***Summary: \n", model.summary())
 
     if args.image_folder != '':
         print("Creating image folder at {}".format(args.image_folder))

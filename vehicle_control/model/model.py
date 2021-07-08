@@ -29,7 +29,7 @@ if __name__ == '__main__':
     trainer.train_model(X_train, y_train, X_valid, y_valid)
 
     print("#### ---- Saving the trained model:")
-    models_dir = 'Models'
+    models_dir = '../../Models'
     model_name = 'model.h5'
 
     vehicle_control_model.save(models_dir + '/' + model_name)
