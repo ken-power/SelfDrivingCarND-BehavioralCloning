@@ -14,6 +14,7 @@ The goals / steps of this project are the following:
 [image_model_plot]: ./images/model_plot.png "Model Plot"
 [image_model_viz]: ./images/model_viz.png "Model Vizualization"
 [image_model_compare]: ./images/model_before_and_after.png "Model before and after dropout and max pooling layers"
+[image_dropout]: ./images/dropout_fig1.png "Dropout"
 [image_data_exploration]: ./images/data_exploration.png "Data Exploration"
 [image_data_dist]: ./images/data_barchart.png "Data Distribution"
 [image_data_dist_normal]: ./images/data_barchart_normalized.png "Normalized Data Distribution"
@@ -40,11 +41,11 @@ Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/4
 ### 1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
-* [model.py](vehicle_control/model/model.py) containing the pipeline to create and train the model. The code is split into multiple files that I structureed in a module I called [vehicle_control](vehicle_control). The structure of the [vehicle_control](vehicle_control) module is described below.
+* [model.py](vehicle_control/model/model.py) containing the pipeline to create and train the model. The code is split into multiple files that I structured in a module I called [vehicle_control](vehicle_control). The structure of the [vehicle_control](vehicle_control) module is described below.
 * [drive.py](vehicle_control/controller/drive.py) for driving the car in autonomous mode.
 * [model.h5](Models/model.h5) containing a trained convolution neural network.
 * [writeup.md](writeup.md) summarizing the results (this file that you are reading now).
-* [An output video](output_videos/behavioral_cloning_lap_camera_perspective_60fps.mp4) created using [video.py](video.py) that demosntrates the car successfully navigatingthe track. 
+* [An output video](output_videos/behavioral_cloning_lap_camera_perspective_60fps.mp4) created using [video.py](video.py) that demonstrates the car successfully navigating the track. 
 
 The video (uploaded to YouTube) was created from the center camera perspective:
 
@@ -104,7 +105,7 @@ RECORDING THIS RUN ...
 (36770) wsgi starting up on http://0.0.0.0:4567
 ```
 
-When the simulator connects, running `drive.py` from a console displays the steering angle, throttle, and speed for each frame, e.g.:
+When the simulator connects, running `drive.py` from a console displays the steering angle, throttle, and speed for each frame, e.g.,
 
 ```text
 steering angle: -0.223748 	throttle: 0.076390 	speed: 9.005400
@@ -137,7 +138,7 @@ steering angle: -0.024324 	throttle: 0.079120 	speed: 8.983800
 
 ### 3. Submission code is usable and readable
 
-The [model.py](vehicle_control/model/model.py) file contains the code for training and saving the convolution neural network. The file contians the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+The [model.py](vehicle_control/model/model.py) file contains the code for training and saving the convolution neural network. The file contains the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
 Here is an extract showing the main pipeline code: 
 ```python
@@ -182,14 +183,13 @@ if __name__ == '__main__':
 
 ### 1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 ([model_builder.py](vehicle_control/model/model_builder.py)). 
 
-The model includes `ELU` layers to introduce non-linearity (code line 20). I chose `ELU` rather than `RELU` because research shows `ELU` performs better ([(Clevert, et al., 2015), (Pedamonti, 2018)](#References)). 
+The model includes `ELU` layers to introduce non-linearity ([model_builder.py](vehicle_control/model/model_builder.py)). I chose `ELU` rather than `RELU` because research shows `ELU` performs better ([(Clevert, et al., 2015), (Pedamonti, 2018)](#References)). 
 
+### 2. Attempts to reduce over-fitting in the model
 
-### 2. Attempts to reduce overfitting in the model
-
-The model was trained and validated on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track. To mitigate the risk of overfititng I use Dropout and Max Pooling.
+I trained and validated the model on different data sets to ensure that the model was not over-fitting. I tested the model by running it through the simulator and ensuring that the vehicle could stay on the track. To mitigate the risk of over-fitting I use Dropout and Max Pooling.
 
 **Dropout Layers**
 
@@ -199,7 +199,9 @@ The CNN I used in this project is trained with data from two simulated driving t
 
 > Dropout is a simple and powerful regularization technique for neural networks and deep learning models ([Brownlee, 2020](#References)). Dropout is a regularization technique for neural network models proposed by [Srivastava, et al. 2014](#References). Dropout is a technique where randomly selected neurons are ignored during training. They are “dropped-out” randomly. This means that their contribution to the activation of downstream neurons is temporally removed on the forward pass and any weight updates are not applied to the neuron on the backward pass.
 
+This figure from [Srivastava, et al. (2014)](#References) illustrates the effects of applying dropout to a neural network:
 
+![alt_text][image_dropout]
 
 **Max Pooling Layers**
 
@@ -209,7 +211,7 @@ A pooling layer is a new layer added after the convolutional layer. Specifically
 
 Maximum pooling, or max pooling, is a pooling operation that calculates the maximum, or largest, value in each patch of each feature map. Keras provides a `MaxPooling2D` layer that downsamples the input along its spatial dimensions (height and width) by taking the maximum value over an input window (of size defined by pool_size) for each channel of the input ([Keras, 2021](#References)).
 
-This visualization shows the model architecture (a) before and (b) after adding Droupout and Max Pooling layers.
+This visualization shows the model architecture (a) before and (b) after adding Dropout and Max Pooling layers.
 
 ![alt_text][image_model_compare]
 
@@ -250,9 +252,9 @@ The overall strategy for deriving a model architecture was to start with the con
 
 We can see from the diagram that the Nvidia model begins with an Input layer (the Input planes at the bottom of the diagram), and then has a Normalization layer. We are going to skip the Normalization layer in our implementation because we have already normalized the data outside of our model, as part of the image processing. The normalized data is then passed into a convolutional layer.
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was over-fitting. 
 
-Note, we can prevent overfitting by using a dropout layer in the model. Note, I experimented with Dropout Layers in different positions in the model at different times, and with varying dropout rates. Eventually, by experimenting with the hyperparameter values during training, I was able to reduce overfitting without the use of dropout layers.
+Note, we can prevent over-fitting by using a dropout layer in the model. Note, I experimented with Dropout Layers in different positions in the model at different times, and with varying dropout rates. Eventually, by experimenting with the hyperparameter values during training, I was able to reduce over-fitting without the use of dropout layers.
 
 The `training_and_test_data()` function in [data_manager.py](vehicle_control/model/data_manager.py) manages this:
 ```python
@@ -344,7 +346,7 @@ I then recorded the vehicle recovering from the left side and right sides of the
 Then I repeated this process on track two in order to get more data points.
 
 ### Image Augmentation
-To augment the data set, I applied several augmentations to the "real" dataset. Applying augmentation techniques is a useful way to create more data from our existing data. This section of the notebook shows how I use zooming, panning, brightness, and flipping to create additional data for training the network. I then randomly apply multiple augmentations to the orginal data, so that, for example, one input image could result in an output image that is a variation that is flipped, rotated, and made brighter.
+To augment the data set, I applied several augmentations to the "real" dataset. Applying augmentation techniques is a useful way to create more data from our existing data. This section of the report shows how I use zooming, panning, brightness, and flipping to create additional data for training the network. I then randomly apply multiple augmentations to the original data, so that, for example, one input image could result in an output image that is a variation that is flipped, rotated, and made brighter.
 
 #### Image Zooming
 ![alt text][image_augmented_zoom]
@@ -512,3 +514,9 @@ This is the video of the car doing a full lap (hosted on YouTube) at normal spee
 * Jason Brownlee, 2020. [Dropout Regularization in Deep Learning Models With Keras](https://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/). Machine Learning Mastery.
 * Keras API Reference, 2021. [MaxPooling2D layer](https://keras.io/api/layers/pooling_layers/max_pooling2d/).
 * Keras API Reference, 2021. [Dropout layer](https://keras.io/api/layers/regularization_layers/dropout/).
+* Amar Budhiraja, 2016. [Dropout in (Deep) Machine learning](https://medium.com/@amarbudhiraja/https-medium-com-amarbudhiraja-learning-less-to-learn-better-dropout-in-deep-machine-learning-74334da4bfc5). Medium.
+* Alessio Gozzoli, 2018. [Practical Guide to Hyperparameters Optimization for Deep Learning Models](https://blog.floydhub.com/guide-to-hyperparameters-search-for-deep-learning-models/). FloydHub.
+* Sebastian Ruder, 2016. [An overview of gradient descent optimization algorithms](https://ruder.io/optimizing-gradient-descent/).
+* Andrej Karpathy, 2019. [A Recipe for Training Neural Networks](http://karpathy.github.io/2019/04/25/recipe/).
+* Jonathan Hui, 2018. [Self-Driving Car Series](https://jonathan-hui.medium.com/self-driving-car-series-b8a356f7f2ac). Medium.
+
