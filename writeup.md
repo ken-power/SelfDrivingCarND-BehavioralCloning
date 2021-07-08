@@ -11,9 +11,10 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image_cnn]: ./images/CNN_architecture.png "CNN Architecture"
-[image_model_summary]: ./images/model_summary.png "Model Summary"
 [image_model_plot]: ./images/model_plot.png "Model Plot"
 [image_model_viz]: ./images/model_viz.png "Model Vizualization"
+[image_model_compare]: ./images/model_before_and_after.png "Model before and after dropout and max pooling layers"
+[image_data_exploration]: ./images/data_exploration.png "Data Exploration"
 [image_data_dist]: ./images/data_barchart.png "Data Distribution"
 [image_data_dist_normal]: ./images/data_barchart_normalized.png "Normalized Data Distribution"
 [image_data_dist_training_val]: ./images/data_barchart_normalized_training_and_validation_sets.png "Distribution of Training and Validation Data Sets"
@@ -47,7 +48,7 @@ My project includes the following files:
 
 The video (uploaded to YouTube) was created from the center camera perspective:
 
-[![Full Lap (60FPS)](https://img.youtube.com/vi/YS8ojkvhBf8/0.jpg)](https://youtu.be/YS8ojkvhBf8 "Video of car driving autonomously for a full lap (60 FPS)")
+[![Full Lap (60FPS)](https://img.youtube.com/vi/70R2hXDUdeU/0.jpg)](https://youtu.be/70R2hXDUdeU "Video of car driving autonomously for a full lap (60 FPS)")
 
 
 This animated GIF shows an extract of the car driving autonomously around the track. Videos of the car completing a full lap are below.
@@ -56,8 +57,7 @@ This animated GIF shows an extract of the car driving autonomously around the tr
 
 This video (hosted on YouTube) is sped up 30x and shows the car driving autonomously for a full lap around the track:
 
-[![Full Lap (30x speed)](https://img.youtube.com/vi/6RJoLfOq9N8/0.jpg)](https://youtu.be/6RJoLfOq9N8 "Video of car driving autonomously for a full lap (30x speed)")
-
+[![Full Lap (30x speed)](https://img.youtube.com/vi/gQU0fOKt1lc/0.jpg)](https://youtu.be/gQU0fOKt1lc "Video of car driving autonomously for a full lap (30x speed)")
 
 
 ### 2. Submission includes functional code
@@ -85,8 +85,6 @@ The files in [vehicle_control/model](vehicle_control/model) are:
 * [model_builder.py](vehicle_control/model/model_builder.py) encapsulates the code that builds the CNN.
 * [model_trainer.py](vehicle_control/model/model_trainer.py) is responsible for training the model.
 * [model.py](vehicle_control/model/model.py) is the entry point to the vehicle control pipeline, and coordinates the other files in the [vehicle_control/model](vehicle_control/model) module.
-
-I also include a notebook called [behavioral_cloning.ipynb](behavioral_cloning.ipynb) that I created to help with data exploration, testing my code, and analyzing the model results. The notebook also imports and uses the code from the [vehicle_control](vehicle_control) module. 
 
 Using the Udacity-provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
 ```sh
@@ -171,7 +169,7 @@ if __name__ == '__main__':
     trainer.train_model(X_train, y_train, X_valid, y_valid)
 
     print("#### ---- Saving the trained model:")
-    models_dir = 'Models'
+    models_dir = '../../Models'
     model_name = 'model.h5'
 
     vehicle_control_model.save(models_dir + '/' + model_name)
@@ -188,56 +186,33 @@ My model consists of a convolution neural network with 3x3 filter sizes and dept
 
 The model includes `ELU` layers to introduce non-linearity (code line 20). I chose `ELU` rather than `RELU` because research shows `ELU` performs better ([(Clevert, et al., 2015), (Pedamonti, 2018)](#References)). 
 
-I did not use a Keras `Lambda` layer to normalize the data because I already normalized the data before training the model. 
-
-```python
-    def nvidia_model(self):
-        model = Sequential(name="Vehicle_Control")
-
-        stride_size = (2, 2)
-
-        image_height = 66
-        image_width = 200
-        number_of_channels = 3
-        dropout_rate = 0.5
-        learning_rate = 1e-4
-
-        input_dimensions = (image_height, image_width, number_of_channels)
-
-        model.add(Conv2D(24, (5, 5), stride_size,
-                         input_shape=input_dimensions,
-                         activation='elu', name='Convolutional_feature_map_24_31x98'))
-
-        model.add(Conv2D(36, (5, 5), stride_size, activation='elu', name='Convolutional_feature_map_36_14x47'))
-        model.add(Conv2D(48, (5, 5), stride_size, activation='elu', name='Convolutional_feature_map_48_5x22'))
-        model.add(Conv2D(64, (3, 3), activation='elu', name='Convolutional_feature_map_64_3x20'))
-        model.add(Conv2D(64, (3, 3), activation='elu', name='Convolutional_feature_map_64_1x18'))
-        # model.add(Dropout(dropout_rate))
-
-        model.add(Flatten(name='Flatten'))
-
-        model.add(Dense(100, activation='elu', name='Fully_connected_100'))
-        # model.add(Dropout(dropout_rate))
-
-        model.add(Dense(50, activation='elu', name='Fully_connected_50'))
-        # model.add(Dropout(dropout_rate))
-
-        model.add(Dense(10, activation='elu', name='Fully_connected_10'))
-        # model.add(Dropout(dropout_rate))
-
-        # outputs the predicted steering angle for our self-driving car
-        model.add(Dense(1, name='Output_vehicle_control'))
-
-        optimizer = Adam(learning_rate=learning_rate)
-
-        model.compile(loss='mse', optimizer=optimizer, metrics=['accuracy', 'mae'])
-
-        return model
-```
 
 ### 2. Attempts to reduce overfitting in the model
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was trained and validated on different data sets to ensure that the model was not overfitting. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track. To mitigate the risk of overfititng I use Dropout and Max Pooling.
+
+**Dropout Layers**
+
+> Deep learning neural networks are likely to quickly overfit a training dataset with few examples ([Brownlee, 2019a](#References)). 
+
+The CNN I used in this project is trained with data from two simulated driving tracks, and although I recorded around 40,000 images for training, and use augmentation techniques, there is still a risk the model will overfit the training data.  
+
+> Dropout is a simple and powerful regularization technique for neural networks and deep learning models ([Brownlee, 2020](#References)). Dropout is a regularization technique for neural network models proposed by [Srivastava, et al. 2014](#References). Dropout is a technique where randomly selected neurons are ignored during training. They are “dropped-out” randomly. This means that their contribution to the activation of downstream neurons is temporally removed on the forward pass and any weight updates are not applied to the neuron on the backward pass.
+
+
+
+**Max Pooling Layers**
+
+> A problem with the output feature maps is that they are sensitive to the location of the features in the input. One approach to address this sensitivity is to down sample the feature maps. This has the effect of making the resulting down sampled feature maps more robust to changes in the position of the feature in the image, referred to by the technical phrase _“local translation invariance.”_ ([Brownlee, 2019b](#References)). Pooling layers provide an approach to down sampling feature maps by summarizing the presence of features in patches of the feature map.
+
+A pooling layer is a new layer added after the convolutional layer. Specifically, a pooling layer is added after a non-linearity - in my case, after an ELU has been applied to the feature maps output by the CNN. 
+
+Maximum pooling, or max pooling, is a pooling operation that calculates the maximum, or largest, value in each patch of each feature map. Keras provides a `MaxPooling2D` layer that downsamples the input along its spatial dimensions (height and width) by taking the maximum value over an input window (of size defined by pool_size) for each channel of the input ([Keras, 2021](#References)).
+
+This visualization shows the model architecture (a) before and (b) after adding Droupout and Max Pooling layers.
+
+![alt_text][image_model_compare]
+
 
 ### 3. Model parameter tuning
 
@@ -254,7 +229,7 @@ These are the model hyperparameter values (set in [model_builder.py](vehicle_con
 ```text
 Model hyperparameters:
 Epochs =  5
-Batch size = 150
+Batch size = 256
 Steps per epoch = 300
 Validation Steps = 200
 ```
@@ -300,14 +275,60 @@ At the end of the process, the vehicle is now able to drive autonomously around 
 
 ### 2. Final Model Architecture
 
-The final model architecture ([model_builder.py](vehicle_control/model/model_builder.py) lines 8-49) consisted of a convolution neural network with the layers and layer sizes shown in this summary view of the architecture:
+The final model architecture ([model_builder.py](vehicle_control/model/model_builder.py)) consisted of a convolution neural network based on the NVIDIA model, and with the addition of Dropout and Max Pooling layers. The layers and layer sizes shown in this summary view of the architecture:
 
-![alt text][image_model_summary]
+```text
+Model: "Vehicle_Control"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+Convolutional_feature_map_24 (None, 31, 98, 24)        1824      
+_________________________________________________________________
+max_pooling2d (MaxPooling2D) (None, 31, 98, 24)        0         
+_________________________________________________________________
+Convolutional_feature_map_36 (None, 14, 47, 36)        21636     
+_________________________________________________________________
+max_pooling2d_1 (MaxPooling2 (None, 14, 47, 36)        0         
+_________________________________________________________________
+Convolutional_feature_map_48 (None, 5, 22, 48)         43248     
+_________________________________________________________________
+max_pooling2d_2 (MaxPooling2 (None, 5, 22, 48)         0         
+_________________________________________________________________
+Convolutional_feature_map_64 (None, 3, 20, 64)         27712     
+_________________________________________________________________
+max_pooling2d_3 (MaxPooling2 (None, 3, 20, 64)         0         
+_________________________________________________________________
+Convolutional_feature_map_64 (None, 1, 18, 64)         36928     
+_________________________________________________________________
+max_pooling2d_4 (MaxPooling2 (None, 1, 18, 64)         0         
+_________________________________________________________________
+Flatten (Flatten)            (None, 1152)              0         
+_________________________________________________________________
+Fully_connected_100 (Dense)  (None, 100)               115300    
+_________________________________________________________________
+dropout (Dropout)            (None, 100)               0         
+_________________________________________________________________
+Fully_connected_50 (Dense)   (None, 50)                5050      
+_________________________________________________________________
+dropout_1 (Dropout)          (None, 50)                0         
+_________________________________________________________________
+Fully_connected_10 (Dense)   (None, 10)                510       
+_________________________________________________________________
+Output_vehicle_control (Dens (None, 1)                 11        
+=================================================================
+Total params: 252,219
+Trainable params: 252,219
+Non-trainable params: 0
+_________________________________________________________________
+
+```
 
 I created this visualization using `tensorflow.keras.utils.plot_model`:
+
 ![alt text][image_model_plot]
 
 I created this visualization using `keras_visuzlizer`: 
+
 ![alt text][image_model_viz]
 
 ### 3. Creation of the Training Set & Training Process
@@ -367,13 +388,21 @@ The code for this is in [image_augmentor.py](vehicle_control/model/image_augment
 
 ```
 
-The following shows 10 random examples. The images on the left are the original images captured from the simulator. The images on the right show the results of applying augmentations. The titles show which augmentations have been applied.
+The following shows 10 random examples taken from both of the training tracks. The images on the left are the original images captured from the simulator. The images on the right show the results of applying augmentations. The titles show which augmentations have been applied.
 
 ![alt text][image_augmented_multiple]
 
+### Data exploration
 
+After the collection process, I had over 38,000 data points. 
 
-After the collection process, I had over 57,000 data points. I then preprocessed this data by ...
+This shows a summary of the data from a basic exploration where I use the [DataManager class](vehicle_control/model/data_manager.py) in a notebook:
+
+![alt_text][image_data_exploration]
+
+Each row contains the filenames for the images captured from the center, left, and right cameras, as well as corresponding data for the steering angle, throttle, reverse, and speed at the point in time the images were captured.   
+
+This bar chart shows the overall distribution of the steering angle data:
 
 ![alt_text][image_data_dist]
 
@@ -467,9 +496,9 @@ if is_training:
 ## Simulation summary
 The car is able to navigate correctly on test data. No tire leaves the drivable portion of the track surface. The car does not pop up onto ledges or roll over any surfaces that would otherwise be considered unsafe.
 
-This is the same video (hosted on YouTube) at normal speed:
+This is the video of the car doing a full lap (hosted on YouTube) at normal speed:
 
-[![Full Lap](https://img.youtube.com/vi/TtyE2fUokBQ/0.jpg)](https://youtu.be/TtyE2fUokBQ "Video of car driving autonomously for a full lap")
+[![Full Lap](https://img.youtube.com/vi/sF0sjSpUsPw/0.jpg)](https://youtu.be/sF0sjSpUsPw "Video of car driving autonomously for a full lap")
 
 # References
 * Bojarski, M., Del Testa, D., Dworakowski, D., Firner, B., Flepp, B., Goyal, P., Jackel, L.D., Monfort, M., Muller, U., Zhang, J. and Zhang, X., 2016. _End to end learning for self-driving cars_. [arXiv preprint arXiv:1604.07316](https://arxiv.org/pdf/1604.07316.pdf).
@@ -477,4 +506,9 @@ This is the same video (hosted on YouTube) at normal speed:
 * Clevert, D.A., Unterthiner, T. and Hochreiter, S., 2015. _Fast and accurate deep network learning by exponential linear units (elus)_. [arXiv preprint arXiv:1511.07289](https://arxiv.org/pdf/1511.07289.pdf).
 * Pedamonti, D., 2018. Comparison of non-linear activation functions for deep neural networks on MNIST classification task. [arXiv preprint arXiv:1804.02763](https://arxiv.org/pdf/1804.02763.pdf).
 * Adrian Rosenbrock, 2021. [Visualizing network architectures using Keras and TensorFlow](https://www.pyimagesearch.com/2021/05/22/visualizing-network-architectures-using-keras-and-tensorflow/). pyimagesearch.
-
+* Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I. and Salakhutdinov, R., 2014. [Dropout: a simple way to prevent neural networks from overfitting](http://www.cs.toronto.edu/~rsalakhu/papers/srivastava14a.pdf). The journal of machine learning research, 15(1), pp.1929-1958.
+* Jason Brownlee, 2019a. [A Gentle Introduction to Dropout for Regularizing Deep Neural Networks](). Machine Learning Mastery.
+* Jason Brownlee, 2019b. [A Gentle Introduction to Pooling Layers for Convolutional Neural Networks](https://machinelearningmastery.com/pooling-layers-for-convolutional-neural-networks/). Machine Learning Mastery.
+* Jason Brownlee, 2020. [Dropout Regularization in Deep Learning Models With Keras](https://machinelearningmastery.com/dropout-regularization-deep-learning-models-keras/). Machine Learning Mastery.
+* Keras API Reference, 2021. [MaxPooling2D layer](https://keras.io/api/layers/pooling_layers/max_pooling2d/).
+* Keras API Reference, 2021. [Dropout layer](https://keras.io/api/layers/regularization_layers/dropout/).

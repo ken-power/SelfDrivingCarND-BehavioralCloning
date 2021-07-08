@@ -15,7 +15,7 @@ The written report is in the file [writeup.md](writeup.md).
 
 The video (uploaded to YouTube) was created from the center camera perspective:
 
-[![Full Lap (60FPS)](https://img.youtube.com/vi/YS8ojkvhBf8/0.jpg)](https://youtu.be/YS8ojkvhBf8 "Video of car driving autonomously for a full lap (60 FPS)")
+[![Full Lap (60FPS)](https://img.youtube.com/vi/70R2hXDUdeU/0.jpg)](https://youtu.be/70R2hXDUdeU "Video of car driving autonomously for a full lap (60 FPS)")
 
 This animated GIF shows an extract of the car driving autonomously around the track. Videos of the car completing a full lap are below.
 
@@ -23,11 +23,11 @@ This animated GIF shows an extract of the car driving autonomously around the tr
 
 This video (hosted on YouTube) is sped up 30x and shows the car driving autonomously for a full lap around the track:
 
-[![Full Lap (30x speed)](https://img.youtube.com/vi/6RJoLfOq9N8/0.jpg)](https://youtu.be/6RJoLfOq9N8 "Video of car driving autonomously for a full lap (30x speed)")
+[![Full Lap (30x speed)](https://img.youtube.com/vi/gQU0fOKt1lc/0.jpg)](https://youtu.be/gQU0fOKt1lc "Video of car driving autonomously for a full lap (30x speed)")
 
 This is the same video (hosted on YouTube) at normal speed:
 
-[![Full Lap](https://img.youtube.com/vi/TtyE2fUokBQ/0.jpg)](https://youtu.be/TtyE2fUokBQ "Video of car driving autonomously for a full lap")
+[![Full Lap](https://img.youtube.com/vi/sF0sjSpUsPw/0.jpg)](https://youtu.be/sF0sjSpUsPw "Video of car driving autonomously for a full lap")
 
 
 
